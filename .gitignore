@@ -3,3 +3,4 @@
 # Ignorar pastas
 uploads/
 .venv/
+__pycache__/
