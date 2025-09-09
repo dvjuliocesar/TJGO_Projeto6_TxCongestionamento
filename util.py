@@ -197,7 +197,7 @@ class ProcessosAnalisador:
     
     def plotar_graficos_ano(self, ano_selecionado): 
 
-        df_grafico = pd.read_csv('uploads\dados_varas_com_je_25032025.csv', sep=',', low_memory=False)
+        df_grafico = pd.read_csv('uploads\dados_je_geral_25042025.csv', sep=',', low_memory=False)
         df_grafico = df_grafico[['processo_id','nome_area_acao', 'comarca', 'data_distribuicao', 'data_baixa']]
         df_grafico['data_distribuicao'] = pd.to_datetime(df_grafico['data_distribuicao'], errors='coerce')
         df_grafico['data_baixa'] = pd.to_datetime(df_grafico['data_baixa'], errors='coerce')
@@ -222,8 +222,12 @@ class ProcessosAnalisador:
         taxa_cong['Taxa de Congestionamento (%)'] = taxa_cong['Taxa de Congestionamento (%)'].astype(float)
 
         # Taxa de congestionamento para juizados
-        #taxa_cong_juizados = taxa_cong[(taxa_cong['nome_area_acao'].str.contains('juizado especial civel')) | 
-                                       #(taxa_cong['nome_area_acao'].str.contains('juizado especial criminal'))]
+        taxa_cong = taxa_cong[(taxa_cong['nome_area_acao'].str.contains('civel')) | 
+                                       (taxa_cong['nome_area_acao'].str.contains('criminal')) | 
+                                       (taxa_cong['nome_area_acao'].str.contains('infancia e juventude civel')) |
+                                       (taxa_cong['nome_area_acao'].str.contains('infancia e juventude infracional')) |
+                                       (taxa_cong['nome_area_acao'].str.contains('fazenda publica mista')) |
+                                       (taxa_cong['nome_area_acao'].str.contains('juizado especial fazenda publica'))]
                                                                                 
         # Mapa de cores personalizado (exemplo para 2 comarcas)
         '''color_map = {
