@@ -14,6 +14,8 @@ Além disso, foi realizada também uma análise **comparativa** entre:
 
 - 🔍 **Comarcas sem transformação:** *Goianira, Goiatuba, Santa Helena de Goiás, Valparaíso de Goiás.*
 
+Agora, nesse **Projeto**, a partiremos para a análise **antes e depois** da unificação dos juizados, considerando apenas as Áreas de Ação **diferentes** dos juizados especiais.
+
 O objetivo dessa comparação é **mensurar o impacto** que tal alteração possa ter causado no sistema judiciário.
 
 
