@@ -196,7 +196,7 @@ class ProcessosAnalisador:
 
         # Filtro (case-insensitive, ignora espaços)
         alvo = (str(comarca) or '').strip().casefold()
-        df = df[df['comarca'].astype(str).str.strip().str.casefold() == alvo]
+        df = df_grafico[df_grafico['comarca'].astype(str).str.strip().str.casefold() == alvo]
 
         if df.empty:
             fig = px.line(title=f'Sem dados para a comarca: {comarca}')
@@ -210,20 +210,20 @@ class ProcessosAnalisador:
         # Pendentes: distribuídos no ano e sem baixa
         pend = (df[df['data_baixa'].isna()]
             .groupby(['nome_area_acao', 'ano_distribuicao'])
-            .size().rename('pendentes'))
+            .size()
+            .reset_index(name='pendentes')
+            .rename(columns={'ano_distribuicao': 'ano'}))
 
         # Baixados: com baixa no ano
         baix = (df[df['data_baixa'].notna()]
             .groupby(['nome_area_acao', 'ano_baixa'])
-            .size().rename('baixados'))
+            .size()
+            .reset_index(name='baixados')
+            .rename(columns={'ano_baixa': 'ano'}))
 
-        # Alinhar os índices
-        pend.index = pend.index.set_names(['nome_area_acao', 'comarca', 'ano'])
-        baix.index = baix.index.set_names(['nome_area_acao', 'comarca', 'ano'])
-
-        base = (pd.concat([pend, baix], axis=1)
-                .fillna(0)
-                .reset_index())
+        
+        base = (pend.merge(baix, on=['nome_area_acao', 'ano'], how='outer')
+                 .fillna(0))
 
         # Taxa de Congestionamento
         soma = base['pendentes'] + base['baixados']
