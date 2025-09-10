@@ -208,16 +208,14 @@ class ProcessosAnalisador:
 
         # Contagens por ano
         # Pendentes: distribuídos no ano e sem baixa
-        pend = (df_grafico[df_grafico['data_baixa'].isna()]
-                .groupby(['nome_area_acao', 'comarca', 'ano_distribuicao'])
-                .size()
-                .rename('pendentes'))
+        pend = (df[df['data_baixa'].isna()]
+            .groupby(['nome_area_acao', 'ano_distribuicao'])
+            .size().rename('pendentes'))
 
         # Baixados: com baixa no ano
-        baix = (df_grafico[df_grafico['data_baixa'].notna()]
-                .groupby(['nome_area_acao', 'comarca', 'ano_baixa'])
-                .size()
-                .rename('baixados'))
+        baix = (df[df['data_baixa'].notna()]
+            .groupby(['nome_area_acao', 'ano_baixa'])
+            .size().rename('baixados'))
 
         # Alinhar os índices
         pend.index = pend.index.set_names(['nome_area_acao', 'comarca', 'ano'])
@@ -240,10 +238,20 @@ class ProcessosAnalisador:
                 .dropna(subset=['ano'])
                 .copy())
         # Garantir tipo inteiro para o eixo X
-        df_plot['ano'] = df_plot['ano'].astype(int)
+        df_plot['ano'] = df_plot['ano'].astype(int).sort_values()
 
         # Ordenação para um X crescente
         df_plot = df_plot.sort_values(['nome_area_acao', 'ano'])
+
+        # Anos disponíveis para o eixo X (apenas desta comarca)
+        anos_disponiveis = sorted(
+            pd.unique(
+                pd.concat([
+                    df['ano_distribuicao'],
+                    df['ano_baixa']
+                ]).dropna().astype(int)
+            )
+        )
 
         # Gráfico de Linhas
         fig_linha = px.line(
@@ -253,7 +261,7 @@ class ProcessosAnalisador:
             color='nome_area_acao',
             markers=True,
             title=f'Taxa de Congestionamento por Ano — {comarca}',
-            labels={'ano':'Ano','nome_area_acao':'Área de Ação'}
+            labels={'ano': 'Ano', 'nome_area_acao': 'Área de Ação'}
         )
         fig_linha.update_traces(
             mode='lines+markers',
@@ -266,5 +274,9 @@ class ProcessosAnalisador:
             yaxis_range=[0, 100],
             margin=dict(l=40, r=20, t=60, b=40)
         )
+
+        # Faz o eixo X mostrar exatamente os anos disponíveis
+        fig_linha.update_xaxes(tickmode='array', tickvals=anos_disponiveis, ticktext=[str(a) for a in anos_disponiveis])
+        
         return fig_linha
        
