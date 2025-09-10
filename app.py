@@ -93,31 +93,37 @@ def grafico():
     return render_template('grafico.html',
                            figura_html=figura_html, anos=anos)
 
-@app.route('/download')
-def download():
+@app.route('/grafico_linha')
+def grafico_linha():
 
-    filtro_comarca, filtro_ano = session.get('args', ['GOIÁS', '2020'])
+    # Pega o parâmetro de filtro da URL
+    filtro_comarca = request.args.get('comarca', 'GOIÁS')
 
-    estatisticas = analisador.calcular_estatisticas(filtro_comarca, filtro_ano)
+    # Verifica se o filtro de ano está vazio ou é inválido
+    if filtro_comarca == '' or not filtro_comarca.isdigit():
+        filtro_comarca = 'GOIÁS'  # Se vazio ou inválido, força o valor padrão '2020'
 
-    # Agrupa os dados por área de ação e calcula as estatísticas
-    estatisticas_df = pd.DataFrame(estatisticas)
-    estatisticas_df = estatisticas_df.rename(columns={
-        "nome_area_acao":"Área de Ação", 
-        "serventia":"Serventia"
-    })
-    
-    # Converte o DataFrame para CSV em memória
-    output = io.StringIO()
-    estatisticas_df.to_csv(output, index=False)
-    output.seek(0)
-    
-    # Cria uma resposta HTTP para download
-    return Response(
-        output,
-        mimetype="text/csv",
-        headers={"Content-Disposition": f"attachment;filename=tabela_estatistica_{filtro_comarca}_{filtro_ano}.csv"}
+    # Converte filtro_comarca para string
+    filtro_comarca = str(filtro_comarca)
+
+    comarca = analisador.obter_comarcas_disponiveis()
+    comarca = [str(comarca) for comarca in comarca]
+
+    # Gráfico
+    fig = analisador.plotar_graficos_ano(filtro_comarca)
+    fig.update_layout(
+        title= None,
+        xaxis_title='Ano',
+        yaxis_title='Taxa de Congestionamento (%)',
+        legend_title='Área de Ação'
     )
+    
+    figura_html = fig.to_html(full_html=False, include_plotlyjs='cdn')
+
+   
+    return render_template('grafico.html',
+                           figura_html=figura_html, comarca=comarca)
+
 
 if __name__ == '__main__':
     app.run(debug=True, host="0.0.0.0", port=5000)
