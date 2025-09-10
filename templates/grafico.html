@@ -170,12 +170,8 @@
             </button>
             
             <button style="width: 90%; border: none; margin-top: 10px;">
-              <a href="/grafico" class="container mt-5" style="color: #000000;">Gráfico em Barras</a>
-          </button>
-
-          <button style="width: 90%; border: none; margin-top: 10px;">
-              <a href="/grafico_linha" class="container mt-5" style="color: #000000;">Gráfico em Linha</a>
-          </button>
+                <a href="/grafico" class="container mt-5" style="color: #000000;">Gráfico</a>
+            </button>
         </div>
     </nav>
 
@@ -214,7 +210,7 @@
         </form>
 
 
-        <h3 style="padding: 1cm; padding-left: 0cm;">Comarcas X Taxa de Congestionamento (%) X Área de Ação - {{ request.args.get('ano', '2020') }}</h3>
+        <h3 style="padding: 1cm; padding-left: 0cm;">Taxa de Congestionamento (%) X Comarcas - {{ request.args.get('ano', '2020') }}</h3>
 
         <!-- <div class="grid-container" style="margin-left: 1cm;">
             <div class="grid-item">Distribuídos: {{ dado1 }}</div>
