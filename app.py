@@ -95,35 +95,30 @@ def grafico():
 
 @app.route('/grafico_linha')
 def grafico_linha():
+    # Lista de comarcas para o dropdown
+    comarcas = analisador.obter_comarcas_disponiveis()
+    # Valor padrão: 'GOIÁS' se existir, senão a primeira
+    default_comarca = 'GOIÁS' if 'GOIÁS' in comarcas else (comarcas[0] if comarcas else '')
 
-    # Pega o parâmetro de filtro da URL
-    filtro_comarca = request.args.get('comarca', 'GOIÁS')
+    # Pega o parâmetro ou usa o padrão acima
+    filtro_comarca = (request.args.get('comarca') or default_comarca).strip()
 
-    # Verifica se o filtro de ano está vazio ou é inválido
-    if filtro_comarca == '' or not filtro_comarca.isdigit():
-        filtro_comarca = 'GOIÁS'  # Se vazio ou inválido, força o valor padrão '2020'
-
-    # Converte filtro_comarca para string
-    filtro_comarca = str(filtro_comarca)
-
-    comarca = analisador.obter_comarcas_disponiveis()
-    comarca = [str(comarca) for comarca in comarca]
-
-    # Gráfico
-    fig = analisador.plotar_graficos_ano(filtro_comarca)
+    # Gera o gráfico CORRETO (por comarca)
+    fig = analisador.plotar_graficos_comarca(filtro_comarca)
     fig.update_layout(
-        title= None,
+        title=None,
         xaxis_title='Ano',
         yaxis_title='Taxa de Congestionamento (%)',
         legend_title='Área de Ação'
     )
-    
     figura_html = fig.to_html(full_html=False, include_plotlyjs='cdn')
 
-   
-    return render_template('grafico.html',
-                           figura_html=figura_html, comarca=comarca)
-
+    return render_template(
+        'grafico_linha.html',
+        figura_html=figura_html,
+        comarcas=comarcas,
+        selected_comarca=filtro_comarca
+    )
 
 if __name__ == '__main__':
     app.run(debug=True, host="0.0.0.0", port=5000)
