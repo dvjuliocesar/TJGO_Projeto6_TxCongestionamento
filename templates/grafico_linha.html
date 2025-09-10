@@ -187,42 +187,21 @@
         </h1>
   
         <form method="get" action="/grafico_linha">
-            <div class='form-group' style="margin: 0 auto;">
-                <!-- <label for='comarca'>Comarca:</label>
-                <select id='comarca' name='comarca'>
-                    <option value="">Selecione uma comarca</option> -->
-                    <!-- Abaixo serão listadas as comarcas únicas para selecionar -->
-                    <!-- {% for comarca in comarcas %}
-                        <option value="{{ comarca }}" {% if comarca == request.args.get('comarca', 'GOIÁS') %}selected{% endif %}>
-                            {{ comarca }}
-                        </option>
-                    {% endfor %}
-                </select>                 -->
-                <label for='comarca'>Comarca:</label>
-                <select id='comarca' name='comarca'>
-                    <option value="">Selecione um ano</option>
-                    <!-- Abaixo serão listados os anos únicos para selecionar -->
-                    {% for ano in anos %}
-                        <option value="{{ comarca }}" {% if comarca == request.args.get('comarca', 'GOIÁS') %}selected{% endif %}>
-                            {{ ano }}
-                        </option>
-                    {% endfor %}
-                </select>
-                <button type="submit">Filtrar</button>
-            </div>
-  
+          <div class='form-group' style="margin: 0 auto;">
+              <label for='comarca'>Comarca:</label>
+              <select id='comarca' name='comarca'>
+                  <!-- Já abre com selected_comarca -->
+                  {% for c in comarcas %}
+                      <option value="{{ c }}" {% if c == selected_comarca %}selected{% endif %}>{{ c }}</option>
+                  {% endfor %}
+              </select>
+              <button type="submit">Filtrar</button>
+          </div>
         </form>
 
-
-        <h3 style="padding: 1cm; padding-left: 0cm;">Taxa de Congestionamento (%) X Ano - {{ request.args.get('comarca', 'GOIÁS') }}</h3>
-
-        <!-- <div class="grid-container" style="margin-left: 1cm;">
-            <div class="grid-item">Distribuídos: {{ dado1 }}</div>
-            <div class="grid-item">Baixado: {{ dado2 }}</div>
-            <div class="grid-item">Pendentes: {{ dado3 }}</div>
-            <div class="grid-item-especial">Taxa de Cong. (%): {{ dado4 }}</div>
-        </div> -->
-
+        <h3 style="padding: 1cm; padding-left: 0cm;">
+          Taxa de Congestionamento (%) X Ano - {{ selected_comarca }}
+        </h3>
     </div>
 
     <div class="text-center graph-container">
