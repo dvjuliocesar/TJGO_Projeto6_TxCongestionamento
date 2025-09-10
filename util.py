@@ -1,4 +1,5 @@
 # Importando bibliotecas
+import numpy as np
 import pandas as pd
 import plotly.express as px
 
@@ -183,3 +184,87 @@ class ProcessosAnalisador:
         )
         return fig_barras
     
+    # Gráfico de Linhas Filtrados por Comarca
+    def plotar_graficos_comarca(self, comarca): 
+        
+        # Base preparada
+        df_grafico = self.df[['processo_id', 'nome_area_acao', 'comarca',
+                            'data_distribuicao', 'data_baixa']].copy()
+
+        df_grafico['data_distribuicao'] = pd.to_datetime(df_grafico['data_distribuicao'], errors='coerce')
+        df_grafico['data_baixa'] = pd.to_datetime(df_grafico['data_baixa'], errors='coerce')
+
+        # Filtro (case-insensitive, ignora espaços)
+        alvo = (str(comarca) or '').strip().casefold()
+        df = df[df['comarca'].astype(str).str.strip().str.casefold() == alvo]
+
+        if df.empty:
+            fig = px.line(title=f'Sem dados para a comarca: {comarca}')
+            fig.update_layout(xaxis_title='Ano', yaxis_title='Taxa de Congestionamento (%)', yaxis_range=[0,100])
+            return fig
+
+        df['ano_distribuicao'] = df['data_distribuicao'].dt.year
+        df['ano_baixa'] = df['data_baixa'].dt.year
+
+        # Contagens por ano
+        # Pendentes: distribuídos no ano e sem baixa
+        pend = (df_grafico[df_grafico['data_baixa'].isna()]
+                .groupby(['nome_area_acao', 'comarca', 'ano_distribuicao'])
+                .size()
+                .rename('pendentes'))
+
+        # Baixados: com baixa no ano
+        baix = (df_grafico[df_grafico['data_baixa'].notna()]
+                .groupby(['nome_area_acao', 'comarca', 'ano_baixa'])
+                .size()
+                .rename('baixados'))
+
+        # Alinhar os índices
+        pend.index = pend.index.set_names(['nome_area_acao', 'comarca', 'ano'])
+        baix.index = baix.index.set_names(['nome_area_acao', 'comarca', 'ano'])
+
+        base = (pd.concat([pend, baix], axis=1)
+                .fillna(0)
+                .reset_index())
+
+        # Taxa de Congestionamento
+        soma = base['pendentes'] + base['baixados']
+        base['Taxa de Congestionamento (%)'] = np.where(
+            soma > 0,
+            (base['pendentes'] / soma) * 100,
+            np.nan
+        ).round(2)
+
+        # Limpeza final para o plot
+        df_plot = (base[['nome_area_acao', 'comarca', 'ano', 'Taxa de Congestionamento (%)']]
+                .dropna(subset=['ano'])
+                .copy())
+        # Garantir tipo inteiro para o eixo X
+        df_plot['ano'] = df_plot['ano'].astype(int)
+
+        # Ordenação para um X crescente
+        df_plot = df_plot.sort_values(['nome_area_acao', 'ano'])
+
+        # Gráfico de Linhas
+        fig_linha = px.line(
+            df_plot,
+            x='ano',
+            y='Taxa de Congestionamento (%)',
+            color='nome_area_acao',
+            markers=True,
+            title=f'Taxa de Congestionamento por Ano — {comarca}',
+            labels={'ano':'Ano','nome_area_acao':'Área de Ação'}
+        )
+        fig_linha.update_traces(
+            mode='lines+markers',
+            hovertemplate='Ano: %{x}<br>Área: %{legendgroup}<br>Taxa: %{y:.2f}%<extra></extra>'
+        )
+        fig_linha.update_layout(
+            xaxis_title='Ano',
+            yaxis_title='Taxa de Congestionamento (%)',
+            legend_title_text='Área de Ação',
+            yaxis_range=[0, 100],
+            margin=dict(l=40, r=20, t=60, b=40)
+        )
+        return fig_linha
+       
