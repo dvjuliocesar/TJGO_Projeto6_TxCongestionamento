@@ -188,7 +188,7 @@
                   <option value="">Selecione uma comarca</option>
                   <!-- Abaixo serão listadas as comarcas únicas para selecionar -->
                   {% for comarca in comarcas %}
-                      <option value="{{ comarca }}" {% if comarca == request.args.get('comarca', 'GOIÁS') %}selected{% endif %}>
+                      <option value="{{ comarca }}" {% if comarca == request.args.get('comarca', 'GOIANIRA') %}selected{% endif %}>
                           {{ comarca }}
                       </option>
                   {% endfor %}
