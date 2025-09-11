@@ -209,21 +209,17 @@ class ProcessosAnalisador:
         # Contagens por ano
         # Pendentes: distribuídos no ano e sem baixa
         pend = (df[df['data_baixa'].isna()]
-            .groupby(['nome_area_acao', 'ano_distribuicao'])
-            .size()
-            .reset_index(name='pendentes')
-            .rename(columns={'ano_distribuicao': 'ano'}))
+            .groupby(['comarca','nome_area_acao','ano_distribuicao'])
+            .size().reset_index(name='pendentes')
+            .rename(columns={'ano_distribuicao':'ano'}))
 
         # Baixados: com baixa no ano
         baix = (df[df['data_baixa'].notna()]
-            .groupby(['nome_area_acao', 'ano_baixa'])
-            .size()
-            .reset_index(name='baixados')
-            .rename(columns={'ano_baixa': 'ano'}))
-
+            .groupby(['comarca','nome_area_acao','ano_baixa'])
+            .size().reset_index(name='baixados')
+            .rename(columns={'ano_baixa':'ano'}))
         
-        base = (pend.merge(baix, on=['nome_area_acao', 'ano'], how='outer')
-                 .fillna(0))
+        base = pend.merge(baix, on=['comarca','nome_area_acao','ano'], how='outer').fillna(0)
 
         # Taxa de Congestionamento
         soma = base['pendentes'] + base['baixados']
@@ -234,9 +230,10 @@ class ProcessosAnalisador:
         ).round(2)
 
         # Limpeza final para o plot
-        df_plot = (base[['nome_area_acao', 'comarca', 'ano', 'Taxa de Congestionamento (%)']]
-                .dropna(subset=['ano'])
-                .copy())
+        df_plot = (base[['comarca','nome_area_acao','ano','Taxa de Congestionamento (%)']]
+           .dropna(subset=['ano'])
+           .copy())
+        
         # Garantir tipo inteiro para o eixo X
         df_plot['ano'] = df_plot['ano'].astype(int).sort_values()
 
