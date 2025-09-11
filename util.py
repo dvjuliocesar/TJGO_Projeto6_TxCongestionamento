@@ -261,7 +261,7 @@ class ProcessosAnalisador:
         )
         fig_linha.update_traces(
             mode='lines+markers',
-            hovertemplate='Ano: %{x}<br>Área: %{legendgroup}<br>Taxa: %{y:.2f}%<extra></extra>'
+            hovertemplate='Ano: %{x}<br>Área de Ação: %{fullData.name}<br>Taxa: %{y:.2f}%<extra></extra>'
         )
         fig_linha.update_layout(
             xaxis_title='Ano',
