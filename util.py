@@ -187,6 +187,8 @@ class ProcessosAnalisador:
     # Gráfico de Linhas Filtrados por Comarca
     def plotar_graficos_comarca(self, comarca): 
         
+        MAX_ANO = 2024
+        
         # Base preparada
         df_grafico = self.df[['processo_id', 'nome_area_acao', 'comarca',
                             'data_distribuicao', 'data_baixa']].copy()
@@ -208,13 +210,13 @@ class ProcessosAnalisador:
 
         # Contagens por ano
         # Pendentes: distribuídos no ano e sem baixa
-        pend = (df[df['data_baixa'].isna()]
+        pend = (df[(df['data_baixa'].isna()) & (df['ano_distribuicao'] <= MAX_ANO)]
             .groupby(['comarca','nome_area_acao','ano_distribuicao'])
             .size().reset_index(name='pendentes')
             .rename(columns={'ano_distribuicao':'ano'}))
 
         # Baixados: com baixa no ano
-        baix = (df[df['data_baixa'].notna()]
+        baix = (df[(df['data_baixa'].notna()) & (df['ano_baixa'] <= MAX_ANO)] 
             .groupby(['comarca','nome_area_acao','ano_baixa'])
             .size().reset_index(name='baixados')
             .rename(columns={'ano_baixa':'ano'}))
@@ -235,20 +237,17 @@ class ProcessosAnalisador:
            .copy())
         
         # Garantir tipo inteiro para o eixo X
-        df_plot['ano'] = df_plot['ano'].astype(int).sort_values()
+        df_plot['ano'] = df_plot['ano'].astype(int)
+        df_plot = df_plot[df_plot['ano'] <= MAX_ANO]
 
         # Ordenação para um X crescente
         df_plot = df_plot.sort_values(['nome_area_acao', 'ano'])
 
         # Anos disponíveis para o eixo X (apenas desta comarca)
-        anos_disponiveis = sorted(
-            pd.unique(
-                pd.concat([
-                    df['ano_distribuicao'],
-                    df['ano_baixa']
-                ]).dropna().astype(int)
-            )
-        )
+        anos_disponiveis = sorted(pd.unique(pd.concat([
+            df.loc[df['ano_distribuicao'] <= MAX_ANO, 'ano_distribuicao'],
+            df.loc[df['ano_baixa'] <= MAX_ANO, 'ano_baixa']
+            ]).dropna().astype(int)))
 
         # Gráfico de Linhas
         fig_linha = px.line(
