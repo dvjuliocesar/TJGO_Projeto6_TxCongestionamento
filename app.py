@@ -16,7 +16,7 @@ analisador = ProcessosAnalisador(filepath)
 def tabela():
 
     # Pega o parâmetro de filtro da URL
-    filtro_comarca = request.args.get('comarca', 'GOIÁS')
+    filtro_comarca = request.args.get('comarca', 'GOIANIRA')
     filtro_ano = request.args.get('ano', '2020')
 
     # Verifica se o filtro de ano está vazio ou é inválido
@@ -98,7 +98,7 @@ def grafico_linha():
     # Lista de comarcas para o dropdown
     comarcas = analisador.obter_comarcas_disponiveis()
     # Valor padrão: 'GOIÁS' se existir, senão a primeira
-    default_comarca = 'GOIÁS' if 'GOIÁS' in comarcas else (comarcas[0] if comarcas else '')
+    default_comarca = 'GOIANIRA' if 'GOIANIRA' in comarcas else (comarcas[0] if comarcas else '')
 
     # Pega o parâmetro ou usa o padrão acima
     filtro_comarca = (request.args.get('comarca') or default_comarca).strip()
